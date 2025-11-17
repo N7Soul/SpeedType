@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeedType - Multiplayer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Lobby Screen -->
+        <div id="lobbyScreen" class="screen">
+            <h1>🏁 SpeedType</h1>
+            <div class="lobby-content">
+                <div class="player-setup">
+                    <input type="text" id="playerName" placeholder="Enter your name" maxlength="15">
+                    <button id="createRoom" class="btn btn-primary">Create Room</button>
+                    <div class="or-divider">OR</div>
+                    <input type="text" id="roomCode" placeholder="Enter room code" maxlength="6">
+                    <button id="joinRoom" class="btn btn-secondary">Join Room</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Waiting Room -->
+        <div id="waitingRoom" class="screen hidden">
+            <h2>Waiting Room</h2>
+            <div class="room-info">
+                <p>Room Code: <span id="displayRoomCode" class="room-code"></span></p>
+                <p>Players: <span id="playerCount">1</span>/8</p>
+            </div>
+            <div id="playerList" class="player-list"></div>
+            <div class="game-settings">
+                <label for="wordLength">Word Length:</label>
+                <select id="wordLength" class="word-length-select">
+                    <option value="random">Random (Any Length)</option>
+                    <option value="3">3 Letters</option>
+                    <option value="4">4 Letters</option>
+                    <option value="5">5 Letters</option>
+                    <option value="6">6 Letters</option>
+                    <option value="7">7 Letters</option>
+                    <option value="8">8 Letters</option>
+                    <option value="9">9 Letters</option>
+                    <option value="10">10 Letters</option>
+                </select>
+            </div>
+            <button id="startGame" class="btn btn-primary">Start Race</button>
+            <button id="leaveRoom" class="btn btn-secondary">Leave Room</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen hidden">
+            <div class="race-info">
+                <div id="countdown" class="countdown"></div>
+                <div class="position">Position: <span id="position">-</span></div>
+            </div>
+            <canvas id="gameCanvas"></canvas>
+            <div class="typing-area">
+                <div id="targetWord" class="target-word"></div>
+                <input type="text" id="typingInput" class="typing-input" placeholder="Type the word..." autocomplete="off" disabled>
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="screen hidden">
+            <h2>🏆 Race Results</h2>
+            <div id="resultsList" class="results-list"></div>
+            <button id="playAgain" class="btn btn-primary">Play Again</button>
+            <button id="backToLobby" class="btn btn-secondary">Back to Lobby</button>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
