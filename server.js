@@ -146,8 +146,10 @@ wss.on('connection', (ws) => {
                     const gameRoom = rooms.get(message.roomCode);
                     if (gameRoom && gameRoom.host === message.playerId) {
                         gameRoom.gameStarted = true;
+                        gameRoom.wordLength = message.wordLength || 'random';
                         broadcastToRoom(message.roomCode, {
-                            type: 'gameStarted'
+                            type: 'gameStarted',
+                            wordLength: gameRoom.wordLength
                         });
                     }
                     break;

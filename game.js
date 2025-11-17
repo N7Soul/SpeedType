@@ -1,6 +1,5 @@
 // Configuration
 const CONFIG = {
-    maxPlayers: 8,
     raceLength: 25, // Number of words to type
     countdownSeconds: 3
 };
@@ -36,37 +35,29 @@ const WORDS = [
     'tournament', 'checkpoint', 'supercharg', 'horsepower', 'incredible', 'phenomenal'
 ];
 
-// Car colors for players
-const CAR_COLORS = [
-    '#FF4444', '#4444FF', '#44FF44', '#FFFF44', 
-    '#FF44FF', '#44FFFF', '#FF8844', '#8844FF'
-];
+// Car color for player
+const CAR_COLOR = '#FF4444';
 
 // Game State
 class GameState {
     constructor() {
         this.screen = 'lobby';
-        this.roomCode = null;
         this.playerId = this.generateId();
         this.playerName = '';
-        this.isHost = false;
-        this.players = new Map();
         this.gameStarted = false;
         this.raceStartTime = null;
         this.wordsTyped = 0;
         this.currentWord = '';
         this.raceFinished = false;
-        this.finishTimes = [];
+        this.finishTime = null;
         this.wordLength = 'random';
         this.filteredWords = [];
+        this.wpm = 0;
+        this.progress = 0;
     }
 
     generateId() {
         return Math.random().toString(36).substr(2, 9);
-    }
-
-    generateRoomCode() {
-        return Math.random().toString(36).substr(2, 6).toUpperCase();
     }
 }
 
@@ -76,36 +67,40 @@ const gameState = new GameState();
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 canvas.width = 940;
-canvas.height = 400;
+canvas.height = 50;
 
 // DOM Elements
 const screens = {
     lobby: document.getElementById('lobbyScreen'),
-    waiting: document.getElementById('waitingRoom'),
     game: document.getElementById('gameScreen'),
     results: document.getElementById('resultsScreen')
 };
 
 const elements = {
     playerName: document.getElementById('playerName'),
-    roomCode: document.getElementById('roomCode'),
-    createRoom: document.getElementById('createRoom'),
-    joinRoom: document.getElementById('joinRoom'),
-    displayRoomCode: document.getElementById('displayRoomCode'),
-    playerCount: document.getElementById('playerCount'),
-    playerList: document.getElementById('playerList'),
     startGame: document.getElementById('startGame'),
-    leaveRoom: document.getElementById('leaveRoom'),
     wordLength: document.getElementById('wordLength'),
     countdown: document.getElementById('countdown'),
     position: document.getElementById('position'),
     targetWord: document.getElementById('targetWord'),
     typingInput: document.getElementById('typingInput'),
-    progressFill: document.getElementById('progressFill'),
     resultsList: document.getElementById('resultsList'),
     playAgain: document.getElementById('playAgain'),
-    backToLobby: document.getElementById('backToLobby')
+    backToLobby: document.getElementById('backToLobby'),
+    errorModal: document.getElementById('errorModal'),
+    errorMessage: document.getElementById('errorMessage'),
+    closeModal: document.getElementById('closeModal')
 };
+
+// Modal functions
+function showErrorModal(message) {
+    elements.errorMessage.textContent = message;
+    elements.errorModal.classList.remove('hidden');
+}
+
+function closeErrorModal() {
+    elements.errorModal.classList.add('hidden');
+}
 
 // Screen Management
 function showScreen(screenName) {
@@ -114,116 +109,22 @@ function showScreen(screenName) {
     gameState.screen = screenName;
 }
 
-// Room Management
-function createRoom() {
-    const name = elements.playerName.value.trim();
-    if (!name) {
-        alert('Please enter your name');
-        return;
-    }
-
-    gameState.playerName = name;
-    gameState.roomCode = gameState.generateRoomCode();
-    gameState.isHost = true;
-    
-    // Add self as first player
-    gameState.players.set(gameState.playerId, {
-        id: gameState.playerId,
-        name: gameState.playerName,
-        isHost: true,
-        progress: 0,
-        position: 1,
-        finished: false,
-        finishTime: null
-    });
-
-    elements.displayRoomCode.textContent = gameState.roomCode;
-    updatePlayerList();
-    showScreen('waiting');
-}
-
-function joinRoom() {
-    const name = elements.playerName.value.trim();
-    const code = elements.roomCode.value.trim().toUpperCase();
-    
-    if (!name) {
-        alert('Please enter your name');
-        return;
-    }
-    
-    if (!code) {
-        alert('Please enter a room code');
-        return;
-    }
-
-    gameState.playerName = name;
-    gameState.roomCode = code;
-    gameState.isHost = false;
-    
-    // In a real multiplayer game, this would connect to a server
-    // For this demo, we'll simulate it
-    alert('In a real implementation, this would connect to the server.\nFor this demo, multiple players would need to share the same browser session.');
-    
-    // Add self as player
-    gameState.players.set(gameState.playerId, {
-        id: gameState.playerId,
-        name: gameState.playerName,
-        isHost: false,
-        progress: 0,
-        position: 1,
-        finished: false,
-        finishTime: null
-    });
-
-    elements.displayRoomCode.textContent = gameState.roomCode;
-    updatePlayerList();
-    showScreen('waiting');
-}
-
-function leaveRoom() {
-    gameState.players.clear();
-    gameState.roomCode = null;
-    gameState.isHost = false;
-    showScreen('lobby');
-}
-
-function updatePlayerList() {
-    elements.playerCount.textContent = gameState.players.size;
-    elements.playerList.innerHTML = '';
-    
-    gameState.players.forEach((player, id) => {
-        const playerDiv = document.createElement('div');
-        playerDiv.className = 'player-item';
-        
-        const colorIndex = Array.from(gameState.players.keys()).indexOf(id);
-        playerDiv.style.borderLeftColor = CAR_COLORS[colorIndex % CAR_COLORS.length];
-        
-        playerDiv.innerHTML = `
-            <div class="player-name">${player.name}</div>
-            ${player.isHost ? '<div class="host-badge">HOST</div>' : ''}
-        `;
-        
-        elements.playerList.appendChild(playerDiv);
-    });
-    
-    // Only host can start the game
-    if (gameState.isHost) {
-        elements.startGame.style.display = 'block';
-        elements.startGame.disabled = gameState.players.size < 1;
-    } else {
-        elements.startGame.style.display = 'none';
-    }
-}
-
 // Game Logic
 function startGame() {
+    const name = elements.playerName.value.trim();
+    if (!name) {
+        showErrorModal('Please enter your name');
+        return;
+    }
+
+    gameState.playerName = name;
+    gameState.wordLength = elements.wordLength.value;
+    
     gameState.gameStarted = true;
     gameState.wordsTyped = 0;
     gameState.raceFinished = false;
-    gameState.finishTimes = [];
-    
-    // Get selected word length
-    gameState.wordLength = elements.wordLength.value;
+    gameState.progress = 0;
+    gameState.finishTime = null;
     
     // Filter words based on selected length
     if (gameState.wordLength === 'random') {
@@ -237,14 +138,6 @@ function startGame() {
             gameState.filteredWords = [...WORDS];
         }
     }
-    
-    // Reset all players
-    gameState.players.forEach(player => {
-        player.progress = 0;
-        player.position = 1;
-        player.finished = false;
-        player.finishTime = null;
-    });
     
     showScreen('game');
     startCountdown();
@@ -271,8 +164,10 @@ function startCountdown() {
 
 function startRace() {
     gameState.raceStartTime = Date.now();
+    gameState.wpm = 0;
     elements.typingInput.disabled = false;
     elements.typingInput.focus();
+    elements.position.textContent = '0 WPM';
     nextWord();
     requestAnimationFrame(gameLoop);
 }
@@ -293,14 +188,11 @@ function checkTyping() {
         elements.typingInput.className = 'typing-input correct';
         gameState.wordsTyped++;
         
-        // Update player progress
-        const player = gameState.players.get(gameState.playerId);
-        if (player && !player.finished) {
-            player.progress = (gameState.wordsTyped / CONFIG.raceLength) * 100;
-            
-            if (player.progress >= 100) {
-                finishRace();
-            }
+        // Update progress
+        gameState.progress = (gameState.wordsTyped / CONFIG.raceLength) * 100;
+        
+        if (gameState.progress >= 100) {
+            finishRace();
         }
         
         setTimeout(nextWord, 300);
@@ -314,20 +206,12 @@ function checkTyping() {
 }
 
 function finishRace() {
-    const player = gameState.players.get(gameState.playerId);
-    if (player && !player.finished) {
-        player.finished = true;
-        player.finishTime = Date.now() - gameState.raceStartTime;
-        player.progress = 100;
-        
-        gameState.finishTimes.push({
-            playerId: player.id,
-            name: player.name,
-            time: player.finishTime
-        });
+    if (!gameState.raceFinished) {
+        gameState.raceFinished = true;
+        gameState.finishTime = Date.now() - gameState.raceStartTime;
+        gameState.progress = 100;
         
         elements.typingInput.disabled = true;
-        gameState.raceFinished = true;
         
         // Show results after a short delay
         setTimeout(() => {
@@ -337,16 +221,13 @@ function finishRace() {
 }
 
 function updateProgress() {
-    const player = gameState.players.get(gameState.playerId);
-    if (player) {
-        elements.progressFill.style.width = player.progress + '%';
-        
-        // Calculate position
-        const positions = Array.from(gameState.players.values())
-            .sort((a, b) => b.progress - a.progress);
-        player.position = positions.findIndex(p => p.id === player.id) + 1;
-        
-        elements.position.textContent = `${player.position}/${gameState.players.size}`;
+    // Calculate WPM (Words Per Minute)
+    if (gameState.raceStartTime && gameState.wordsTyped > 0) {
+        const timeElapsed = (Date.now() - gameState.raceStartTime) / 1000 / 60; // in minutes
+        gameState.wpm = Math.round(gameState.wordsTyped / timeElapsed);
+        elements.position.textContent = gameState.wpm + ' WPM';
+    } else {
+        elements.position.textContent = '0 WPM';
     }
 }
 
@@ -357,54 +238,52 @@ function drawRacetrack() {
     ctx.fillStyle = '#2d5016';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Track lanes
-    const laneHeight = canvas.height / CONFIG.maxPlayers;
-    const playerArray = Array.from(gameState.players.values());
+    // Single track lane
+    const laneHeight = canvas.height;
+    const y = 0;
     
-    playerArray.forEach((player, index) => {
-        const y = index * laneHeight;
-        
-        // Lane background (alternating colors)
-        ctx.fillStyle = index % 2 === 0 ? '#404040' : '#4a4a4a';
-        ctx.fillRect(0, y, canvas.width, laneHeight);
-        
-        // Lane lines
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([10, 10]);
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        
-        // Start line
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(30, y + 5, 3, laneHeight - 10);
-        
-        // Finish line
-        for (let i = 0; i < 5; i++) {
-            ctx.fillStyle = i % 2 === 0 ? '#ffffff' : '#000000';
-            ctx.fillRect(canvas.width - 40, y + i * (laneHeight / 5), 30, laneHeight / 5);
-        }
-        
-        // Draw car
-        const carX = 40 + (player.progress / 100) * (canvas.width - 100);
-        const carY = y + laneHeight / 2;
-        const carIndex = Array.from(gameState.players.keys()).indexOf(player.id);
-        
-        drawCar(carX, carY, CAR_COLORS[carIndex % CAR_COLORS.length]);
-        
-        // Player name
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 14px Arial';
-        ctx.textAlign = 'left';
-        ctx.fillText(player.name, 5, y + 20);
-        
-        // Progress percentage
-        ctx.textAlign = 'right';
-        ctx.fillText(Math.floor(player.progress) + '%', canvas.width - 5, y + 20);
-    });
+    // Lane background
+    ctx.fillStyle = '#404040';
+    ctx.fillRect(0, y, canvas.width, laneHeight);
+    
+    // Lane lines (top and bottom)
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([10, 10]);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(canvas.width, 0);
+    ctx.moveTo(0, canvas.height);
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    // Start line
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(30, y + 5, 3, laneHeight - 10);
+    
+    // Finish line
+    const checkeredHeight = laneHeight / 5;
+    for (let i = 0; i < 5; i++) {
+        ctx.fillStyle = i % 2 === 0 ? '#ffffff' : '#000000';
+        ctx.fillRect(canvas.width - 40, y + i * checkeredHeight, 30, checkeredHeight);
+    }
+    
+    // Draw car
+    const carX = 40 + (gameState.progress / 100) * (canvas.width - 100);
+    const carY = laneHeight / 2;
+    
+    drawCar(carX, carY, CAR_COLOR);
+    
+    // Player name
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 16px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(gameState.playerName, 10, 25);
+    
+    // Progress percentage
+    ctx.textAlign = 'right';
+    ctx.fillText(Math.floor(gameState.progress) + '%', canvas.width - 10, 25);
 }
 
 function drawCar(x, y, color) {
@@ -592,40 +471,21 @@ function gameLoop() {
 function showResults() {
     showScreen('results');
     
-    // Sort by finish time
-    const sortedResults = gameState.finishTimes.sort((a, b) => a.time - b.time);
-    
     elements.resultsList.innerHTML = '';
     
-    sortedResults.forEach((result, index) => {
-        const resultDiv = document.createElement('div');
-        resultDiv.className = 'result-item';
-        
-        const rankClass = index === 0 ? 'first' : index === 1 ? 'second' : index === 2 ? 'third' : '';
-        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
-        
-        resultDiv.innerHTML = `
-            <div class="rank ${rankClass}">${medal} ${index + 1}</div>
-            <div class="player-name">${result.name}</div>
-            <div class="time">${(result.time / 1000).toFixed(2)}s</div>
-        `;
-        
-        elements.resultsList.appendChild(resultDiv);
-    });
+    const resultDiv = document.createElement('div');
+    resultDiv.className = 'result-item';
     
-    // Show players who didn't finish
-    gameState.players.forEach(player => {
-        if (!player.finished) {
-            const resultDiv = document.createElement('div');
-            resultDiv.className = 'result-item';
-            resultDiv.innerHTML = `
-                <div class="rank">-</div>
-                <div class="player-name">${player.name}</div>
-                <div class="time">DNF</div>
-            `;
-            elements.resultsList.appendChild(resultDiv);
-        }
-    });
+    const finalWPM = gameState.wpm;
+    const timeSeconds = (gameState.finishTime / 1000).toFixed(2);
+    
+    resultDiv.innerHTML = `
+        <div class="rank first">🥇 1</div>
+        <div class="player-name">${gameState.playerName}</div>
+        <div class="time">${timeSeconds}s (${finalWPM} WPM)</div>
+    `;
+    
+    elements.resultsList.appendChild(resultDiv);
 }
 
 function playAgain() {
@@ -633,32 +493,21 @@ function playAgain() {
 }
 
 function backToLobby() {
-    gameState.players.clear();
-    gameState.roomCode = null;
-    gameState.isHost = false;
     gameState.gameStarted = false;
     showScreen('lobby');
 }
 
 // Event Listeners
-elements.createRoom.addEventListener('click', createRoom);
-elements.joinRoom.addEventListener('click', joinRoom);
 elements.startGame.addEventListener('click', startGame);
-elements.leaveRoom.addEventListener('click', leaveRoom);
 elements.playAgain.addEventListener('click', playAgain);
+elements.closeModal.addEventListener('click', closeErrorModal);
 elements.backToLobby.addEventListener('click', backToLobby);
 
 elements.typingInput.addEventListener('input', checkTyping);
 
 elements.playerName.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-        createRoom();
-    }
-});
-
-elements.roomCode.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        joinRoom();
+        startGame();
     }
 });
 
