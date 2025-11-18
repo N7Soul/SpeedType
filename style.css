@@ -307,11 +307,6 @@ input[type="text"]:focus {
     background: #e9ecef;
 }
 
-.typing-input.correct {
-    border-color: #28a745;
-    background: #d4edda;
-}
-
 .typing-input.incorrect {
     border-color: #dc3545;
     background: #f8d7da;

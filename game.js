@@ -6,33 +6,72 @@ const CONFIG = {
 
 // Word list for typing (organized by length for filtering)
 const WORDS = [
+
     // 3 letters
-    'car', 'win', 'lap', 'rpm', 'top', 'run', 'gas', 'go', 'max', 'rev',
+    'act', 'add', 'aim', 'air', 'all', 'and', 'any', 'are', 'arm', 'art',
+    'ask', 'bad', 'bag', 'bar', 'bed', 'big', 'boy', 'box', 'but', 'can',
+    'car', 'cat', 'cup', 'cut', 'dad', 'day', 'did', 'dip', 'dog', 'dry',
+    'eat', 'end', 'eye', 'far', 'few', 'fix', 'fly', 'for', 'fun', 'gas',
+    'get', 'got', 'had', 'has', 'hat', 'her', 'him', 'his', 'hit', 'how',
+    'ice', 'job', 'kid', 'leg', 'let', 'lip', 'man', 'map', 'may', 'mom',
+    'new', 'not', 'now', 'oil', 'off', 'old', 'one', 'our', 'out', 'pay',
+    'pen', 'pet', 'pie', 'pig', 'pop', 'pot', 'put', 'red', 'run', 'sad',
+    'see', 'set', 'sit', 'sun', 'the', 'top', 'try', 'two', 'use', 'was',
+    'way', 'who', 'why', 'win', 'yes', 'yet', 'you', 'zip', 'zoo',
+
     // 4 letters
     'race', 'fast', 'zoom', 'dash', 'lead', 'apex', 'gear', 'burn', 'flip', 'jump',
     'skid', 'turn', 'push', 'grip', 'flag', 'time', 'mile', 'drag', 'spin', 'fuel',
+    'able', 'back', 'ball', 'band', 'bank', 'base', 'bath', 'bear', 'beat', 'been',
+    'bell', 'belt', 'best', 'bill', 'bird', 'bite', 'blue', 'boat', 'body', 'book',
+    'boot', 'born', 'both', 'bowl', 'buck', 'burn', 'busy', 'call', 'calm', 'camp',
+    'card', 'care', 'case', 'cats', 'cell', 'chat', 'chip', 'city', 'coat', 'cold',
+    'come', 'cook', 'cool', 'copy', 'crop', 'dark', 'data', 'date', 'deal', 'dear',
+    'desk', 'dial', 'dirt', 'door', 'down', 'draw', 'drop', 'drum', 'duck', 'each',
+    'earn', 'east', 'easy', 'edge', 'else', 'ever', 'face', 'fact', 'fall', 'farm',
+    'fast', 'fear', 'feed', 'feel', 'feet', 'fire', 'fish', 'five', 'flow', 'food',
+    'foot', 'form', 'four', 'free', 'from', 'full', 'game', 'gate', 'gift', 'girl',
+    'give', 'glad', 'goal', 'gold', 'good', 'gray', 'grow', 
+
     // 5 letters
-    'speed', 'drive', 'track', 'boost', 'turbo', 'power', 'brake', 'nitro', 'rapid',
-    'swift', 'quick', 'flash', 'racer', 'motor', 'wheel', 'steer', 'shift', 'drift',
-    'coupe', 'rally', 'curve', 'start', 'grand', 'super', 'ultra', 'hyper', 'first',
+    'speed', 'drive', 'track', 'boost', 'turbo', 'power', 'brake', 'nitro', 'rapid', 'swift',
+    'quick', 'flash', 'racer', 'motor', 'wheel', 'steer', 'shift', 'drift', 'coupe', 'rally',
+    'curve', 'start', 'grand', 'super', 'ultra', 'hyper', 'first', 'about', 'above', 'after',
+    'again', 'apple', 'beach', 'begin', 'black', 'blood', 'break', 'bread', 'bring', 'build',
+    'check', 'child', 'class', 'clean', 'clear', 'close', 'color', 'could', 'dance', 'dream',
+    'drive', 'early', 'earth', 'every', 'field', 'fight', 'first', 'floor', 'fruit', 'ghost',
+    'great', 'green', 'happy', 'heart', 'heavy', 'house', 'light', 'money', 'month', 'night',
+    'other', 'place', 'plant', 'point', 'quick', 'round', 'story',
+
     // 6 letters
-    'finish', 'winner', 'engine', 'wheels', 'streak', 'corner', 'racing', 'driver',
-    'turbo', 'trophy', 'battle', 'street', 'custom', 'legend', 'master', 'rocket',
-    'speedy', 'ground', 'vector', 'thrust', 'cruise', 'sprint', 'octane', 'charge',
+    'finish', 'winner', 'engine', 'wheels', 'streak', 'corner', 'racing', 'driver', 'abouts', 'across',
+    'advice', 'almost', 'always', 'animal', 'answer', 'arrive', 'asleep', 'basket', 'before', 'behind',
+    'better', 'bottle', 'bridge', 'bright', 'broken', 'butter', 'camera', 'candle', 'carpet', 'castle',
+    'chance', 'change', 'cheese', 'circle', 'coffee', 'corner', 'couple', 'create', 'danger', 'desert',
+    'doctor', 'dollar', 'effect', 'eleven', 'energy', 'enough', 'family', 'farmer', 'father', 'figure',
+    'follow', 'garden', 'golden', 'ground', 'growth', 'hunter', 'inside', 'island', 'trophy', 'battle',
+    'street', 'custom', 'legend', 'master', 'rocket', 'speedy', 'ground', 'vector', 'thrust', 'cruise',
+    'sprint', 'octane', 'charge',
+
     // 7 letters
-    'champion', 'victory', 'compete', 'circuit', 'vehicle', 'maximum', 'blaster',
-    'cruiser', 'roadway', 'supreme', 'extreme', 'turbine', 'pursuit', 'dragster',
-    'machine', 'formula', 'gearbox', 'horsepower', 'highway', 'special', 'perfect',
+    'champion', 'victory', 'compete', 'circuit', 'vehicle', 'maximum', 'blaster', 'ability', 'against',
+    'already', 'arrived', 'balance', 'because', 'bedroom', 'between', 'bottle', 'calling', 'captain',
+    'central', 'certain', 'control', 'country', 'decided', 'feeling', 'friends', 'growing', 'happen',
+    'hundred', 'imagine', 'morning', 'outside', 'picture', 'cruiser', 'roadway', 'supreme', 'extreme',
+    'turbine', 'pursuit', 'dragster', 'machine', 'formula', 'gearbox', 'highway', 'special', 'perfect',
+    
     // 8 letters
     'throttle', 'steering', 'overtake', 'straight', 'position', 'ultimate', 'velocity',
     'burnout', 'powerful', 'champion', 'aeroport', 'freeway', 'velocity', 'momentum',
     'overdrive', 'manifold', 'traction', 'velocity', 'cylinder', 'dominat', 'champion',
+
     // 9 letters
     'challenge', 'adrenaline', 'motorsport', 'spectacle', 'precision', 'lightning',
     'scramble', 'dominance', 'explosive', 'adventure', 'excellence', 'supremacy',
+
     // 10 letters
     'accelerate', 'automobile', 'competition', 'performance', 'challenger', 'combustion',
-    'tournament', 'checkpoint', 'supercharg', 'horsepower', 'incredible', 'phenomenal'
+    'tournament', 'checkpoint', 'horsepower', 'incredible', 'phenomenal',
 ];
 
 // Car color for player
@@ -140,6 +179,7 @@ function startGame() {
     }
     
     showScreen('game');
+    drawRacetrack(); // Draw initial track and car
     startCountdown();
 }
 
@@ -152,8 +192,10 @@ function startCountdown() {
         count--;
         if (count > 0) {
             elements.countdown.textContent = count;
+            drawRacetrack(); // Keep drawing during countdown
         } else if (count === 0) {
             elements.countdown.textContent = 'GO!';
+            drawRacetrack(); // Keep drawing during countdown
         } else {
             clearInterval(countdownInterval);
             elements.countdown.textContent = '';
@@ -185,7 +227,6 @@ function checkTyping() {
     const target = gameState.currentWord.toLowerCase();
     
     if (typed === target) {
-        elements.typingInput.className = 'typing-input correct';
         gameState.wordsTyped++;
         
         // Update progress
@@ -195,7 +236,7 @@ function checkTyping() {
             finishRace();
         }
         
-        setTimeout(nextWord, 300);
+        nextWord();
     } else if (gameState.currentWord.toLowerCase().startsWith(typed)) {
         elements.typingInput.className = 'typing-input';
     } else {
